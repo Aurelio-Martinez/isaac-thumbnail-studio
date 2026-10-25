@@ -2,11 +2,13 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { resetEditorStore, useEditorStore, getSelectedLayers } from "@/features/editor/store";
 import {
   createDefaultBackground,
+  createImageLayer,
   CANVAS_HEIGHT,
   CANVAS_WIDTH,
   makeId,
   type ImageLayer,
 } from "@/features/editor/types";
+import { effectiveOutlineWidth } from "@/features/editor/effects";
 import type { AssetCategory } from "@/features/assets/types";
 import { makeAssetRef, makeText } from "./fixtures";
 import { createProject } from "@/features/projects/serialize";
@@ -155,6 +157,42 @@ describe("editor scene operations", () => {
     expect(layer.effects.glow.enabled).toBe(true);
     expect(layer.effects.glow.color).toBe("#8b6fd1");
     expect(layer.effects.outline.enabled).toBe(true);
+  });
+
+  it("scales an outline when the layer is resized and re-anchors on width edits", () => {
+    useEditorStore.getState().addLayer(
+      createImageLayer(makeAssetRef(), {
+        width: 360,
+        height: 360,
+      }),
+    );
+    const id = useEditorStore.getState().scene.layers[0]!.id;
+    let layer = useEditorStore.getState().scene.layers[0] as ImageLayer;
+    expect(layer.effects.outline.referenceSize).toBe(360);
+
+    useEditorStore.getState().updateLayer(id, { width: 180, height: 180 });
+    layer = useEditorStore.getState().scene.layers[0] as ImageLayer;
+    expect(layer.effects.outline.referenceSize).toBe(360);
+    expect(
+      effectiveOutlineWidth(
+        layer.effects.outline.width,
+        layer.width,
+        layer.height,
+        layer.effects.outline.referenceSize,
+      ),
+    ).toBe(2);
+
+    useEditorStore.getState().updateLayer(id, { effects: { outline: { width: 6 } } });
+    layer = useEditorStore.getState().scene.layers[0] as ImageLayer;
+    expect(layer.effects.outline.referenceSize).toBe(180);
+    expect(
+      effectiveOutlineWidth(
+        layer.effects.outline.width,
+        layer.width,
+        layer.height,
+        layer.effects.outline.referenceSize,
+      ),
+    ).toBe(6);
   });
 
   it("starts transparent, sets a wiki background, and supports undo", () => {

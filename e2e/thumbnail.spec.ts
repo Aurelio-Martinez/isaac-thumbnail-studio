@@ -24,7 +24,14 @@ async function readSavedProject(page: Page) {
               type: string;
               x: number;
               y: number;
+              width: number;
               text?: string;
+              effects: {
+                outline: {
+                  width: number;
+                  referenceSize?: number;
+                };
+              };
             }>;
           };
         }
@@ -227,6 +234,59 @@ test("uploads an image, exports transparency, and moves it through portable JSON
   expect(importedBytes.readUInt32BE(16)).toBe(1280);
   expect(importedBytes.readUInt32BE(20)).toBe(720);
   await cleanContext.close();
+});
+
+test("keeps an image outline proportionate when the layer is resized", async ({ page }) => {
+  await page.route("**/api/asset-proxy*", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "image/svg+xml",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect x="4" y="4" width="56" height="56" rx="6" fill="#d5aa4a"/><rect x="14" y="14" width="36" height="36" fill="#17171d"/><rect x="24" y="24" width="16" height="16" fill="#f2ece0"/></svg>`,
+    }),
+  );
+
+  await resetStorage(page);
+  await page.getByRole("button", { name: "Characters", exact: true }).click();
+  const character = page.getByRole("button", { name: /Add .*Isaac Character/ }).first();
+  await expect(character).toBeVisible({ timeout: 20_000 });
+  await character.click();
+  await page.getByRole("tab", { name: /Design/ }).click();
+
+  const widthInputs = page.getByLabel("Width", { exact: true });
+  await expect(widthInputs).toHaveCount(2);
+  const layerWidthInput = widthInputs.first();
+  const outlineWidthInput = widthInputs.last();
+  const originalWidth = Number(await layerWidthInput.inputValue());
+  expect(originalWidth).toBeGreaterThan(100);
+  await expect(outlineWidthInput).toHaveValue("4");
+
+  const shrunkWidth = Math.round((originalWidth / 2) * 10) / 10;
+  await layerWidthInput.fill(String(shrunkWidth));
+  await layerWidthInput.blur();
+  await expect.poll(async () => Number(await outlineWidthInput.inputValue())).toBeLessThan(4);
+
+  await page.keyboard.press("Control+s");
+  await expect
+    .poll(async () => {
+      const layer = (await readSavedProject(page))?.scene.layers[0];
+      return layer?.effects.outline.referenceSize ?? 0;
+    })
+    .toBeGreaterThan(shrunkWidth);
+  const saved = (await readSavedProject(page))?.scene.layers[0];
+  expect(saved?.effects.outline.width).toBe(4);
+  expect(saved?.effects.outline.referenceSize).toBeGreaterThan(shrunkWidth);
+
+  await page.reload({ waitUntil: "networkidle" });
+  await page.getByRole("tab", { name: /Layers/ }).click();
+  await page
+    .getByRole("button", { name: /Select .* layer/ })
+    .first()
+    .click();
+  await page.getByRole("tab", { name: /Design/ }).click();
+  await expect
+    .poll(async () => Number(await page.getByLabel("Width", { exact: true }).last().inputValue()))
+    .toBeLessThan(4);
 });
 
 test("background selector offers transparent and wiki backgrounds", async ({ page }) => {

@@ -114,6 +114,7 @@ export function ImageLayerNode({
     layer.effects.outline.width,
     layer.width,
     layer.height,
+    layer.effects.outline.referenceSize,
   );
   const outline = useOutlinedImage(
     userImage,

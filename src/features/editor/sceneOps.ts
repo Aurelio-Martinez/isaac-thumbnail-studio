@@ -1,6 +1,7 @@
 import {
   CANVAS_HEIGHT,
   CANVAS_WIDTH,
+  defaultLayerHeight,
   estimateTextHeight,
   makeId,
   type GlowEffect,
@@ -59,7 +60,31 @@ export function updateLayerInScene(scene: Scene, id: string, patch: LayerPatch):
   const current = scene.layers[index]!;
   const { effects, ...rest } = patch;
   let next = { ...current, ...rest } as Layer;
-  if (effects) next = { ...next, effects: mergeEffects(current.effects, effects) } as Layer;
+  let nextEffects = effects ? mergeEffects(current.effects, effects) : current.effects;
+
+  if (current.type === "image") {
+    const oldShort = Math.min(current.width, current.height);
+    const newShort = Math.min(next.width, next.height);
+    const outline = nextEffects.outline;
+    // Changing outline width anchors it to the current layer size. A plain
+    // resize keeps the reference and therefore scales the border proportionally.
+    if (effects?.outline?.width !== undefined) {
+      nextEffects = {
+        ...nextEffects,
+        outline: { ...outline, referenceSize: newShort },
+      };
+    } else if (!outline.referenceSize) {
+      nextEffects = {
+        ...nextEffects,
+        outline: {
+          ...outline,
+          referenceSize: Math.max(oldShort, defaultLayerHeight(current.asset.category)),
+        },
+      };
+    }
+  }
+
+  next = { ...next, effects: nextEffects } as Layer;
   if (
     next.type === "text" &&
     (patch.text !== undefined ||

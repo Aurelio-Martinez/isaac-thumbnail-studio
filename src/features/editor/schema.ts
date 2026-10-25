@@ -60,6 +60,7 @@ const outlineSchema = z.object({
   enabled: z.boolean(),
   color: colorSchema,
   width: z.number().min(0).max(64),
+  referenceSize: z.number().min(1).max(20_000).optional(),
 });
 
 const glowSchema = z.object({

@@ -20,8 +20,9 @@ no game images are stored in this repository.
   the verified catalog, upload support, fit/opacity, dim, and vignette controls. Transparent
   compositions export with a real alpha channel.
 - **Image effects**: outline silhouettes, drop shadow, glow, opacity, flip, rotation, and
-  pixel-art-friendly nearest-neighbor scaling. Outline thickness is capped at 6% of a
-  layer's shorter side so small sprites do not receive an oversized border.
+  pixel-art-friendly nearest-neighbor scaling. Outline width scales down with the layer
+  from the size where you set it, and is capped at 6% of the layer's shorter side so
+  small sprites do not receive an oversized border.
 - **Text layers**: five bundled fonts, size/weight/color/alignment/line-height/letter
   spacing, stroke, shadow, glow, and four original headline treatments.
 - **Six composition presets** with item scale, spacing, character scale, and text position
@@ -68,8 +69,8 @@ npm run typecheck        # tsc --noEmit
 npm run lint             # ESLint
 npm run format:check     # Prettier
 npm run validate:assets  # catalog manifest, URLs, duplicate IDs, no bundled art
-npm run test             # Vitest + React Testing Library (66 tests)
-npm run test:e2e         # Playwright + axe (8 browser tests)
+npm run test             # Vitest + React Testing Library (69 tests)
+npm run test:e2e         # Playwright + axe (9 browser tests)
 npm run check            # typecheck + lint + format + assets + unit tests + build
 ```
 
@@ -459,9 +460,9 @@ Commands actually run in this environment:
 | `npm run format:check`                    | Passed                                                    |
 | `npm run validate:assets`                 | Passed — 1,613 catalog entries, no bundled artwork        |
 | `npm run validate:assets -- --check-urls` | Passed — 6 remote image URLs sampled                      |
-| `npm run test`                            | Passed — 66 tests in 7 files                              |
+| `npm run test`                            | Passed - 69 tests in 7 files                              |
 | `npm run build`                           | Passed — static build in `dist/`                          |
-| `npm run test:e2e`                        | Passed — 8 Chromium tests                                 |
+| `npm run test:e2e`                        | Passed — 9 Chromium tests                                 |
 | `npx playwright test e2e/a11y.spec.ts`    | Passed - no axe WCAG A/AA violations in editor or dialogs |
 
 Playwright coverage:
@@ -471,14 +472,16 @@ Playwright coverage:
    verify layers, text, and moved position.
 2. Upload a PNG → export with transparency (verify alpha 0) → export portable JSON with
    an embedded upload → import in a clean browser context → export successfully.
-3. Background selector: verify the Transparent option, load wiki backgrounds, switch
+3. Shrink an outlined sprite → verify its rendered outline width scales down, the
+   original width is retained as a reference, and the setting survives a reload.
+4. Background selector: verify the Transparent option, load wiki backgrounds, switch
    between them, and return to Transparent.
-4. Block the artwork proxy → attempt to export a remote layer → verify the export is
+5. Block the artwork proxy → attempt to export a remote layer → verify the export is
    blocked with a retry/recovery message.
-5. Search the verified wiki.gg catalog for “Yum Heart”, add it, and verify source/license
+6. Search the verified wiki.gg catalog for “Yum Heart”, add it, and verify source/license
    details.
-6. Mobile viewport: verify sheets for Artwork/Layers and a usable canvas.
-7. axe-core WCAG 2 A/AA scans of the main editor, export dialog, and project manager.
+7. Mobile viewport: verify sheets for Artwork/Layers and a usable canvas.
+8. axe-core WCAG 2 A/AA scans of the main editor, export dialog, and project manager.
 
 Live API caveat: wiki.gg returned a Cloudflare challenge to headless Chromium during
 verification, so live API unit tests use deterministic fixtures and browser tests use the

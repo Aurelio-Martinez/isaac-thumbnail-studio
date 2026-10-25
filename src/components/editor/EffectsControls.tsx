@@ -15,7 +15,12 @@ export function EffectsControls({ layer, disabled, onChange }: EffectsControlsPr
     effects.outline.width,
     layer.width,
     layer.height,
+    effects.outline.referenceSize,
   );
+  // Image outlines scale with the layer, so show what is actually rendered at
+  // the current size. Editing this value re-anchors the outline to that size.
+  const displayedOutlineWidth =
+    layer.type === "image" ? renderedOutlineWidth : effects.outline.width;
   return (
     <div className="space-y-2.5">
       <div className="rounded border border-line bg-ink-800/50 p-2.5">
@@ -44,7 +49,7 @@ export function EffectsControls({ layer, disabled, onChange }: EffectsControlsPr
             />
             <NumberField
               label="Width"
-              value={effects.outline.width}
+              value={displayedOutlineWidth}
               min={0}
               max={32}
               step={0.5}
@@ -58,12 +63,8 @@ export function EffectsControls({ layer, disabled, onChange }: EffectsControlsPr
         ) : null}
         {effects.outline.enabled && layer.type === "image" ? (
           <p className="mt-1.5 text-[9px] leading-snug text-muted">
-            Renders at{" "}
-            <span className="font-mono text-cream-dim">
-              {renderedOutlineWidth.toFixed(1).replace(/\.0$/, "")} px
-            </span>{" "}
-            at this size. Outlines are capped at 6% of the layer’s shorter side so small sprites do
-            not get an oversized border.
+            The outline scales down with the layer, capped at 6% of its shorter side. Editing the
+            width re-anchors it to the current size.
           </p>
         ) : null}
       </div>

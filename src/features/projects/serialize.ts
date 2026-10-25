@@ -12,6 +12,7 @@ import {
   restoreEmbeddedAssets,
   stripUploadUrls,
 } from "@/features/assets/uploads";
+import { ensureOutlineReferences } from "@/features/editor/effects";
 import { migrateLegacyBundledAssets } from "@/features/projects/migrate";
 import type { AssetRef } from "@/features/assets/types";
 
@@ -86,7 +87,8 @@ export async function hydrateProjectUploads(project: ProjectFile): Promise<{
   warnings: string[];
 }> {
   const migrated = migrateLegacyBundledAssets(project.scene);
-  const { scene, missing } = await hydrateSceneUploads(migrated.scene);
+  const withOutlineReferences = ensureOutlineReferences(migrated.scene);
+  const { scene, missing } = await hydrateSceneUploads(withOutlineReferences);
   const warnings = [...migrated.warnings];
   if (missing.length > 0) {
     warnings.push(

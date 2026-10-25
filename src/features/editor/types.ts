@@ -62,6 +62,8 @@ export interface OutlineEffect {
   enabled: boolean;
   color: string;
   width: number;
+  /** Short side of the layer when the width was chosen, for proportional scale-down. */
+  referenceSize?: number;
 }
 
 export interface GlowEffect {
@@ -213,8 +215,12 @@ const CATEGORY_BASE_HEIGHT: Record<AssetCategory, number> = {
   uploads: 240,
 };
 
+export function defaultLayerHeight(category: AssetCategory): number {
+  return CATEGORY_BASE_HEIGHT[category] ?? 160;
+}
+
 export function createImageLayer(asset: AssetRef, overrides: Partial<ImageLayer> = {}): ImageLayer {
-  const baseHeight = CATEGORY_BASE_HEIGHT[asset.category] ?? 160;
+  const baseHeight = defaultLayerHeight(asset.category);
   const aspect = asset.width > 0 && asset.height > 0 ? asset.width / asset.height : 1;
   const height = baseHeight;
   const width = Math.max(24, Math.min(CANVAS_WIDTH, height * aspect));
@@ -235,7 +241,13 @@ export function createImageLayer(asset: AssetRef, overrides: Partial<ImageLayer>
     flipX: false,
     flipY: false,
   };
-  return { ...base, ...overrides };
+  const merged: ImageLayer = { ...base, ...overrides };
+  merged.effects = structuredCloneEffect(merged.effects);
+  merged.effects.outline = {
+    ...merged.effects.outline,
+    referenceSize: Math.min(merged.width, merged.height),
+  };
+  return merged;
 }
 
 export function createTextLayer(overrides: Partial<TextLayer> = {}): TextLayer {
