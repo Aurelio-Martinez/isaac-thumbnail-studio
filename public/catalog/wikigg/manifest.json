@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "providerId": "wikigg",
+  "sourceName": "The Binding of Isaac: Rebirth Wiki (wiki.gg)",
+  "api": "https://bindingofisaacrebirth.wiki.gg/api.php",
+  "site": "https://bindingofisaacrebirth.wiki.gg",
+  "generatedAt": "2026-10-25T12:44:45.740Z",
+  "imagePolicy": "Metadata only. No image files are stored in this repository. Images are streamed from the wiki at runtime through an allowlisted proxy.",
+  "license": "Game artwork © Nicalis, Inc. / Edmund McMillen. Wiki files are marked IN COPYRIGHT (Template:License/game). Verify before publishing.",
+  "categories": {
+    "characters": 51,
+    "collectibles": 757,
+    "trinkets": 247,
+    "cards": 67,
+    "pills": 28,
+    "bosses": 436,
+    "backgrounds": 27,
+    "active-items": 169
+  },
+  "total": 1613,
+  "requests": 47
+}

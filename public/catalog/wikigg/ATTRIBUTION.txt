@@ -1,0 +1,10 @@
+Artwork metadata source: The Binding of Isaac: Rebirth Wiki (wiki.gg)
+https://bindingofisaacrebirth.wiki.gg/api.php
+
+This directory contains only factual file metadata (titles, dimensions,
+direct file URLs, and source page URLs). No image data is redistributed.
+
+Game artwork is © Nicalis, Inc. / Edmund McMillen. Files on the wiki are
+marked IN COPYRIGHT. Each asset links to its source page for attribution.
+
+Generated: 2026-10-25T12:44:45.740Z
