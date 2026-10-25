@@ -98,18 +98,38 @@ export async function renderThumbnail(
 
     stage.add(backgroundClone);
     stage.add(contentClone);
-    stage.draw();
 
     let dataUrl: string;
     try {
-      dataUrl = stage.toDataURL({
-        pixelRatio: 1,
-        mimeType: "image/png",
+      // Do not use stage.toDataURL(): it creates a single smoothing context for
+      // every layer. Content must use nearest-neighbor (matching the editor),
+      // while photographic wiki backgrounds should stay smoothly downscaled.
+      const size = {
         x: 0,
         y: 0,
         width: APP_CONFIG.canvasWidth,
         height: APP_CONFIG.canvasHeight,
+        pixelRatio: 1,
+      };
+      const backgroundCanvas = backgroundClone.toCanvas({
+        ...size,
+        imageSmoothingEnabled: true,
       });
+      const contentCanvas = contentClone.toCanvas({
+        ...size,
+        imageSmoothingEnabled: false,
+      });
+
+      const output = document.createElement("canvas");
+      output.width = APP_CONFIG.canvasWidth;
+      output.height = APP_CONFIG.canvasHeight;
+      const context = output.getContext("2d");
+      if (!context) {
+        throw new ExportError("The browser could not allocate the export canvas.", "render_failed");
+      }
+      context.drawImage(backgroundCanvas, 0, 0);
+      context.drawImage(contentCanvas, 0, 0);
+      dataUrl = output.toDataURL("image/png");
     } catch (error) {
       if ((error as Error).name === "SecurityError") {
         throw new ExportError(

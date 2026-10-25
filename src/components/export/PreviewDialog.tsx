@@ -136,7 +136,7 @@ export function PreviewDialog({
             <img
               src={state.url}
               alt="Final thumbnail composition"
-              className="mx-auto max-h-[62vh] w-auto max-w-full rounded border border-line bg-ink-900"
+              className="mx-auto max-h-[62vh] w-auto max-w-full rounded border border-line bg-ink-900 [image-rendering:pixelated]"
             />
             <figcaption className="mt-2 text-center font-mono text-[9.5px] text-muted">
               {state.width}×{state.height} · {formatBytes(state.blob.size)} PNG · no editor UI

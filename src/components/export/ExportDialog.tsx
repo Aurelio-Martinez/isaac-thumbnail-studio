@@ -312,7 +312,7 @@ export function ExportDialog({
               <img
                 src={result.previewUrl}
                 alt="Rendered thumbnail preview"
-                className="h-auto w-full"
+                className="h-auto w-full [image-rendering:pixelated]"
               />
             </div>
             <p className="mt-2 font-mono text-[9.5px] text-muted">
