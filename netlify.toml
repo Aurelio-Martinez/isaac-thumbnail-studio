@@ -33,12 +33,9 @@
     Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
     Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://bindingofisaacrebirth.wiki.gg https://bindingofisaacrebirth.fandom.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
 
-[[redirects]]
-  from = "/api/asset-proxy"
-  to = "/.netlify/functions/asset-proxy"
-  status = 200
-  force = true
-
+# Do not add a redirect for /api/asset-proxy. The Netlify Function declares
+# `config.path = "/api/asset-proxy"`, which disables its default
+# /.netlify/functions/asset-proxy URL and routes the path directly.
 [[redirects]]
   from = "/*"
   to = "/index.html"
