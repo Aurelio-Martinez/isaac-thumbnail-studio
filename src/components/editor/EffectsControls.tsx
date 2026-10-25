@@ -1,4 +1,5 @@
 import { ColorField, SliderField, SwitchField, NumberField } from "@/components/ui/controls";
+import { effectiveOutlineWidth } from "@/features/editor/effects";
 import type { Layer, LayerEffects } from "@/features/editor/types";
 import type { EffectsPatch } from "@/features/editor/sceneOps";
 
@@ -10,6 +11,11 @@ export interface EffectsControlsProps {
 
 export function EffectsControls({ layer, disabled, onChange }: EffectsControlsProps) {
   const effects: LayerEffects = layer.effects;
+  const renderedOutlineWidth = effectiveOutlineWidth(
+    effects.outline.width,
+    layer.width,
+    layer.height,
+  );
   return (
     <div className="space-y-2.5">
       <div className="rounded border border-line bg-ink-800/50 p-2.5">
@@ -49,6 +55,16 @@ export function EffectsControls({ layer, disabled, onChange }: EffectsControlsPr
               }
             />
           </div>
+        ) : null}
+        {effects.outline.enabled && layer.type === "image" ? (
+          <p className="mt-1.5 text-[9px] leading-snug text-muted">
+            Renders at{" "}
+            <span className="font-mono text-cream-dim">
+              {renderedOutlineWidth.toFixed(1).replace(/\.0$/, "")} px
+            </span>{" "}
+            at this size. Outlines are capped at 6% of the layer’s shorter side so small sprites do
+            not get an oversized border.
+          </p>
         ) : null}
       </div>
 

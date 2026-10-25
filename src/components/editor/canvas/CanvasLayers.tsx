@@ -2,6 +2,7 @@ import { Group, Image as KonvaImage, Layer as KonvaLayer, Rect, Text } from "rea
 import type Konva from "konva";
 import type { ImageLayer, SceneBackground, TextLayer } from "@/features/editor/types";
 import { useAssetImage } from "@/features/assets/imageRegistry";
+import { effectiveOutlineWidth } from "@/features/editor/effects";
 import { useOutlinedImage } from "@/components/editor/canvas/useOutlinedImage";
 
 interface NodeCallbacks {
@@ -109,15 +110,20 @@ export function ImageLayerNode({
 }) {
   const entry = useAssetImage(layer.asset.imageUrl);
   const userImage = entry?.status === "loaded" ? entry.image : null;
+  const outlineWidth = effectiveOutlineWidth(
+    layer.effects.outline.width,
+    layer.width,
+    layer.height,
+  );
   const outline = useOutlinedImage(
     userImage,
     layer.width,
     layer.height,
     layer.effects.outline.color,
-    Math.max(1, layer.effects.outline.width),
+    outlineWidth,
     layer.flipX,
     layer.flipY,
-    layer.effects.outline.enabled,
+    layer.effects.outline.enabled && outlineWidth > 0,
   );
 
   if (!layer.asset.imageUrl) {
