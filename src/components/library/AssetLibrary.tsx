@@ -30,7 +30,9 @@ type LibraryTab = "browse" | "recent" | "favorites";
 
 const CATEGORY_TABS: Array<{ id: (typeof ASSET_CATEGORIES)[number] | "all"; label: string }> = [
   { id: "all", label: "All" },
-  ...ASSET_CATEGORIES.filter((category) => category !== "uploads").map((category) => ({
+  ...ASSET_CATEGORIES.filter(
+    (category) => category !== "uploads" && category !== "backgrounds",
+  ).map((category) => ({
     id: category,
     label: category === "collectibles" ? "Items" : ASSET_CATEGORY_META[category].plural,
   })),
@@ -73,9 +75,7 @@ function writePreference(key: string, value: string): void {
 
 export function AssetLibrary({ className }: { className?: string }) {
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<(typeof ASSET_CATEGORIES)[number] | "all">(
-    "backgrounds",
-  );
+  const [category, setCategory] = useState<(typeof ASSET_CATEGORIES)[number] | "all">("characters");
   const [tab, setTab] = useState<LibraryTab>("browse");
   const [remoteEnabled, setRemoteEnabled] = useState(
     () => readPreference(STORAGE_KEYS.online, "1") !== "0",
@@ -102,6 +102,10 @@ export function AssetLibrary({ className }: { className?: string }) {
 
   const search = useAssetSearch({ query, category, remoteEnabled, providerId });
   const favoriteIds = useMemo(() => new Set(favorites.map((asset) => asset.id)), [favorites]);
+  const remoteResults = useMemo(
+    () => search.remote.filter((asset) => asset.category !== "backgrounds"),
+    [search.remote],
+  );
 
   useEffect(() => {
     writePreference(STORAGE_KEYS.online, remoteEnabled ? "1" : "0");
@@ -391,7 +395,7 @@ export function AssetLibrary({ className }: { className?: string }) {
                     {activeSource.shortLabel}
                   </h3>
                   {search.remoteState === "ready" ? (
-                    <span className="text-[9px] text-muted">{search.remote.length} loaded</span>
+                    <span className="text-[9px] text-muted">{remoteResults.length} loaded</span>
                   ) : null}
                 </div>
                 {search.globalSearch ? (
@@ -430,13 +434,13 @@ export function AssetLibrary({ className }: { className?: string }) {
                       Your uploads are still available in the Uploads category.
                     </p>
                   </div>
-                ) : search.remote.length === 0 ? (
+                ) : remoteResults.length === 0 ? (
                   <p className="rounded border border-dashed border-line px-3 py-5 text-center text-[10px] text-muted">
                     No artwork matched. Try another term or category.
                   </p>
                 ) : (
                   <>
-                    {renderGrid(search.remote, false)}
+                    {renderGrid(remoteResults, false)}
                     {search.nextCursor ? (
                       <button
                         type="button"

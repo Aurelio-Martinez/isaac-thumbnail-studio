@@ -43,6 +43,17 @@ test("creates, edits, exports, and restores a thumbnail with wiki artwork", asyn
   const pageErrors: string[] = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
 
+  // Keep the export test deterministic even when the live image proxy is being
+  // rate-limited by the wiki host. Catalog metadata still comes from the app.
+  await page.route("**/api/asset-proxy*", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "image/svg+xml",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect x="4" y="4" width="56" height="56" rx="6" fill="#d5aa4a"/><rect x="14" y="14" width="36" height="36" fill="#17171d"/><rect x="24" y="24" width="16" height="16" fill="#f2ece0"/></svg>`,
+    }),
+  );
+
   await resetStorage(page);
   await expect(page.getByText("Start with a spark")).toBeVisible();
   await expect(page.getByRole("button", { name: "Use a transparent background" })).toHaveAttribute(

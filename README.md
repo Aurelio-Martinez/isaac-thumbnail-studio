@@ -90,8 +90,8 @@ already running). Unit tests never touch the network.
    You can also upload your own background.
 2. Choose a character, then search and add collectibles, active items, trinkets, cards,
    pills, bosses, or room screenshots.
-3. Drag artwork from the library onto the canvas, or click a card. Background cards also
-   have a “use as background” action.
+3. Drag artwork from the library onto the canvas, or click a card. Uploaded cards can also
+   be set as a background; wiki backdrops live in the Design → Background selector.
 4. Transform layers on the canvas or type exact values in **Design**. Use **Layers** to
    reorder, lock, hide, duplicate, or delete.
 5. Add a headline with **T**. Apply a style preset or tune typography and effects.
@@ -191,7 +191,8 @@ The normalized asset includes: `id`, `name`, `category`, `imageUrl`, `thumbnailU
 and optional upload id. Rendering code does not know the source provider.
 
 Supported categories: characters, collectibles, active items, trinkets, cards, pills,
-backgrounds, bosses, uploads.
+backgrounds, bosses, uploads. Backgrounds are intentionally excluded from the artwork
+library and are chosen in the Design panel instead.
 
 Providers:
 
